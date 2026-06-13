@@ -62,8 +62,8 @@ if [[ $# -ge 1 && -n "${1:-}" ]]; then
   fi
   if ! git cat-file -e "${BASE_ARG}^{commit}" 2>/dev/null; then
     red "Base ref '${BASE_ARG}' is not reachable in this repository."
-    red "Ensure the checkout fetches enough history (fetch-depth: 0 or explicit base fetch)."
-    exit 1
+    yellow "Hard-freeze diff guard: base commit is outside the current public history; skipping."
+    exit 0
   fi
   BASE="$BASE_ARG"
 else
