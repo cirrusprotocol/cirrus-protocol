@@ -1,0 +1,126 @@
+name: CI
+
+# Runs on every push to main and on every pull request.
+# Does NOT require devnet credentials, Anchor CLI, or Solana CLI.
+# Includes the validator-free Rust ↔ TypeScript canonical hash parity gate.
+# Full integration tests (anchor run test_all — 7 validator-backed integration suites) are
+# intentionally excluded from this workflow; they are a future "integration-ci" job
+# that will require the Solana + Anchor toolchain to be installed in CI.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  ci:
+    name: Lint · type-check · ZK indexer · parity gate · Rust tests · hygiene
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Hard-freeze guard ────────────────────────────────────────────────────
+      # Runs before expensive steps. Compares BASE...HEAD (merge-base form) so
+      # the check is accurate for both PRs and direct pushes to main.
+      #
+      # Override policy (intentional on-chain milestone commits only):
+      #   pull_request — add the 'freeze-ok' label to the PR.
+      #   push         — include '[freeze-ok]' in the head commit message.
+      # Override does not skip lint, type-check, or tests.
+      - name: Hard-freeze diff guard
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          HEAD_COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          # Determine whether the freeze override is enabled for this run.
+          ALLOW_HARD_FREEZE_DIFF=false
+          OVERRIDE_REASON=""
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            if echo "$PR_LABELS_JSON" | grep -q '"freeze-ok"'; then
+              ALLOW_HARD_FREEZE_DIFF=true
+              OVERRIDE_REASON="PR has 'freeze-ok' label"
+            fi
+          elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            if printf '%s' "$HEAD_COMMIT_MSG" | grep -qF '[freeze-ok]'; then
+              ALLOW_HARD_FREEZE_DIFF=true
+              OVERRIDE_REASON="commit message contains '[freeze-ok]'"
+            fi
+          fi
+
+          if [[ "$ALLOW_HARD_FREEZE_DIFF" == "true" ]]; then
+            echo "Hard-freeze override: ENABLED — ${OVERRIDE_REASON}"
+          else
+            echo "Hard-freeze override: DISABLED"
+          fi
+
+          BASE="${PR_BASE_SHA:-${PUSH_BEFORE_SHA:-}}"
+          if [[ -n "$BASE" ]]; then
+            ALLOW_HARD_FREEZE_DIFF="$ALLOW_HARD_FREEZE_DIFF" \
+              bash scripts/ops/check_hard_freeze_diff.sh "$BASE"
+          else
+            ALLOW_HARD_FREEZE_DIFF="$ALLOW_HARD_FREEZE_DIFF" \
+              bash scripts/ops/check_hard_freeze_diff.sh
+          fi
+
+      # ── Node / TypeScript ────────────────────────────────────────────────────
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Prettier check
+        run: npm run lint
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: ZK indexer and ops tests
+        run: npm run test:zk-indexer
+
+      - name: Canonical hash parity gate
+        run: npx mocha -r ts-node/register --extensions ts -t 60000 tests/parity_canonical.ts
+
+      # ── Rust ─────────────────────────────────────────────────────────────────
+      # rust-toolchain.toml pins the Rust version and components.
+      - name: Set up Rust
+        run: rustup show
+
+      - name: Rust dependency cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Rust unit tests
+        run: cargo test
+
+      # ── Hygiene ──────────────────────────────────────────────────────────────
+      - name: Public hygiene check
+        run: bash scripts/ops/check_public_hygiene.sh
+
+      - name: Shell script syntax check
+        run: |
+          bash -n scripts/ops/check_deploy_artifact_not_mock.sh
+          bash -n scripts/deploy_devnet.sh
+          bash -n scripts/run_all_tests.sh
+
+      - name: Whitespace check
+        run: git diff --check

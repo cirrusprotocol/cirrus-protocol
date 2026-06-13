@@ -1,0 +1,26 @@
+[toolchain]
+package_manager = "npm"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+shielded_pool_anchor = "E593efjkVU3Z6pJQtSLf7jECFeGBVy2UQZwET4nqLhyq"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/withdraw.ts"
+test_admin = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/admin_hardening.ts"
+test_threshold = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/attestation_threshold.ts"
+test_all = "bash scripts/run_all_tests.sh"
+test_parity = "npx mocha -r ts-node/register --extensions ts -t 60000 tests/parity_canonical.ts"
+test_migration = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/migration.ts"
+test_deposit = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/deposit.ts"
+test_init_note_tree = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/init_note_tree.ts"
+test_deposit_note = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/deposit_note.ts"
+test_withdraw_zk = "npx mocha -r ts-node/register --extensions ts -t 1000000 tests/withdraw_zk.ts"
+update_idl = "mkdir -p idl && cp target/idl/shielded_pool_anchor.json idl/shielded_pool_anchor.json && echo 'IDL snapshot updated: idl/shielded_pool_anchor.json'"

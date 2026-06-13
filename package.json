@@ -1,0 +1,32 @@
+{
+  "license": "ISC",
+  "scripts": {
+    "test": "anchor test --validator legacy",
+    "test:zk-indexer": "mocha -r ts-node/register --extensions ts -t 1000000 tests/zk_indexer_tree.ts tests/zk_indexer_events.ts tests/zk_indexer_persistence.ts tests/zk_indexer_fixture.ts tests/zk_indexer_log_parser.ts tests/zk_indexer_e2e.ts tests/zk_indexer_rpc_adapter.ts tests/zk_indexer_rpc_fetch.ts tests/zk_indexer_event_decoder.ts tests/zk_indexer_anchor_event_parser_adapter.ts tests/ops_init_note_tree_devnet.ts tests/ops_deposit_note_devnet.ts tests/ops_submit_root_devnet.ts tests/ops_inspect_allowed_roots_devnet.ts tests/ops_set_root_submitter_devnet.ts tests/zk_prover_witness.ts tests/zk_tx_hash_parity.ts tests/zk_real_fixture_shape.ts tests/zk_proof_encoder_shape.ts tests/zk_vk_parser_shape.ts tests/zk_public_inputs_shape.ts tests/zk_withdraw_artifacts.ts tests/zk_withdraw_instruction.ts tests/ops_withdraw_zk_devnet.ts tests/ops_verify_withdraw_zk_send_devnet.ts tests/ops_analyze_snapshot_hygiene.ts tests/ops_analyze_allowed_roots_hygiene.ts tests/ops_devnet_doctor_allowed_roots.ts tests/ops_remove_allowed_root_devnet.ts tests/ops_inspect_nullifier_state_devnet.ts tests/ops_devnet_doctor_note_tree.ts tests/ops_generate_note_secret.ts tests/ops_verify_zk_artifacts.ts tests/ops_shared_pool_status_devnet.ts tests/ops_shared_pool_deposit_plan.ts tests/ops_devnet_alpha_plan.ts tests/ops_shared_pool_privacy_diagnostics.ts tests/ops_shared_pool_tester_deposit.ts tests/ops_shared_pool_tester_withdraw_simulate.ts tests/npm_devnet_alpha_package.ts tests/npm_devnet_alpha_pack_smoke.ts",
+    "zk:witness-dry-run": "ts-node --project tsconfig.json scripts/zk_witness_dry_run.ts",
+    "alpha:deposit": "ts-node --project tsconfig.json scripts/ops/shared_pool_tester_deposit.ts",
+    "alpha:status": "ts-node --project tsconfig.json scripts/ops/shared_pool_status_devnet.ts",
+    "alpha:withdraw:simulate": "ts-node --project tsconfig.json scripts/ops/shared_pool_tester_withdraw_simulate.ts",
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+  },
+  "dependencies": {
+    "@anchor-lang/core": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^25.6.0",
+    "chai": "^4.3.4",
+    "chai-as-promised": "^8.0.2",
+    "circomlibjs": "0.1.7",
+    "keccak": "^3.0.4",
+    "mocha": "^9.0.3",
+    "prettier": "^2.6.2",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "tweetnacl": "^1.0.3",
+    "typescript": "^5.9.3"
+  }
+}

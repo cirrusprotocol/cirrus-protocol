@@ -1,0 +1,18 @@
+{
+  "schema_version": "2",
+  "circuit": "WITHDRAW_SOL_V1",
+  "status": "real",
+  "audit_status": "not-audited",
+  "deployment_scope": "devnet-only",
+  "notes": "Devnet-only artifacts; not externally audited. Official iden3/snarkjs published ptau integrity hash is Blake2b-512 (verified with b2sum): 58efc8bf2834d04768a3d7ffcd8e1e23d461561729beaac4e3e7a47829a1c9066d5320241e124a1a8e8aa6c75be0ba66f65bc8239a0542ed38e11276f6fdb4d9. ptau_hash_sha256 is the locally computed SHA-256 of the same Blake2b-verified ptau file. A single local Phase 2 contribution was used with 32 bytes from /dev/urandom; entropy was not printed, stored, or retained. Final .zkey is operator-controlled and kept outside the repo. Raw verification_key.json, proof.json, public.json, witness, zkey, r1cs, wasm, and ptau are not committed. canonical_proof_fixture_hash_sha256 records the proof artifact generated in this pass (real Anchor PDAs: pool_state=HcAkT4obzEEaHyevyVvmU7drEtSUg1m4XxF1VTWGoCdm, config=6DUXKzex1nLyFSvAfRRneaukfH1YXrQQ6t58vcYZpHJu); do not assume future proof regeneration is byte-for-byte deterministic unless deterministic proof randomness is explicitly introduced later.",
+  "ptau_source_url": "https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_13.ptau",
+  "ptau_hash_sha256": "95751b5207f20aa822f01109902315c01c15250303feacea2b8aa7dc9fdfeefd",
+  "circuit_source_hash_sha256": "e8933a4f92244520ffac29e2772ebdcc5bc428adaa60045470917372ae776e04",
+  "phase2_contribution_hash": "0de83284e3b01b5571632de74f5e05feddc35a8bd350865ab74e92ecdd52d626c3f2bf1e822d01050802409a778ee26393acde412abc98095c7a5fdece880150",
+  "circuit_hash_sha256": "4baf68e548dc7fc2abb1c6f3e6b53f48024890f417f85b53f482823f6ceb8678",
+  "proving_key_hash_sha256": "204ef02fce3e5bb9f5d9b07c06bd4da550d6caefc4842ba508d0aafef4e49bbe",
+  "verification_key_hash_sha256": "2f13a8318ad49fdca7abc0e475b2d17b090d8eecdf69a483266d9c08f9197b84",
+  "canonical_proof_fixture_hash_sha256": "1619f42785e72006658c778d30b52c4b08e989c6bbc4f333f393e3f7c4bb447c",
+  "generated_at": "2026-06-05T06:54:58Z",
+  "generator_tool": "circom@2.1.6 + snarkjs@0.7.4 + circomlib@2.0.5"
+}

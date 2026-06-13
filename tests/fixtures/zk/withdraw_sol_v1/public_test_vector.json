@@ -1,0 +1,21 @@
+{
+  "schema_version": "1",
+  "circuit": "WITHDRAW_SOL_V1",
+  "description": "Public-input test vector derived from the canonical devnet proof (TEST_SECRET=12345, real Anchor PDAs). root and nullifier_hash are real values from the generated Groth16 proof. tx_hash is computed from the locked parity vector constants and must match computeTxHash(...).",
+  "params": {
+    "program_id": "E593efjkVU3Z6pJQtSLf7jECFeGBVy2UQZwET4nqLhyq",
+    "pool_pda": "HcAkT4obzEEaHyevyVvmU7drEtSUg1m4XxF1VTWGoCdm",
+    "config_pda": "6DUXKzex1nLyFSvAfRRneaukfH1YXrQQ6t58vcYZpHJu",
+    "recipient": "FTu67mwyPuoaRB7U3zewHfAmRXvHC7y7zEt5a5eEwx8o",
+    "relayer": "7GhrwRsxkBrE1bKYdbBUbDZXhY4aBB8bG4d6V1BPAcXe",
+    "denomination": "1000000000",
+    "fee": "10000000",
+    "chain_id": "1",
+    "expiry_slot": "500000",
+    "circuit_version": "1"
+  },
+  "public_inputs_order": ["root", "nullifier_hash", "tx_hash"],
+  "root_be_hex": "019484fc7e68257f3bbfbd277beabb5a6082bc0dd6f96154bdebde0b81b72f38",
+  "nullifier_hash_be_hex": "27cb78d0541f3912c8645bd60acbe7a7205225e0e6f55a17f4843ac719e3eafe",
+  "tx_hash_be_hex": "17115e272898a4cca8177791e2e99f51b2e01e7bc2d1381164217f6ef931bcac"
+}

@@ -1,0 +1,10 @@
+{
+  "WARNING": "NOT A REAL PROOF. FOR ENCODER SHAPE TESTS ONLY. All values are synthetic and have no cryptographic meaning.",
+  "circuit": "WITHDRAW_SOL_V1",
+  "pi_a": ["1", "2", "1"],
+  "pi_b": [["10", "20"], ["30", "40"], ["1", "0"]],
+  "pi_c": ["100", "200", "1"],
+  "protocol": "groth16",
+  "curve": "bn128",
+  "expected_proof_b_layout_note": "proof_b[0..32]=pi_b[0][1]=20 BE, proof_b[32..64]=pi_b[0][0]=10 BE, proof_b[64..96]=pi_b[1][1]=40 BE, proof_b[96..128]=pi_b[1][0]=30 BE"
+}

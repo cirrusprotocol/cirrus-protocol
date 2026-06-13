@@ -1,0 +1,17 @@
+{
+  "WARNING": "NOT A REAL VERIFICATION KEY. FOR VK PARSER SHAPE TESTS ONLY. Coordinates are synthetic and have no cryptographic meaning.",
+  "protocol": "groth16",
+  "curve": "bn128",
+  "nPublic": 3,
+  "vk_alpha_1": ["1", "2", "1"],
+  "vk_beta_2": [["10", "20"], ["30", "40"], ["1", "0"]],
+  "vk_gamma_2": [["50", "60"], ["70", "80"], ["1", "0"]],
+  "vk_delta_2": [["90", "100"], ["110", "120"], ["1", "0"]],
+  "IC": [
+    ["1000", "1001", "1"],
+    ["1002", "1003", "1"],
+    ["1004", "1005", "1"],
+    ["1006", "1007", "1"]
+  ],
+  "expected_layout_note": "Synthetic shape only. G1 points serialize as x_BE||y_BE. G2 points serialize as x.c1_BE||x.c0_BE||y.c1_BE||y.c0_BE. IC length 4 = 3 public inputs + constant term."
+}

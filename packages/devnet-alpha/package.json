@@ -1,0 +1,22 @@
+{
+  "name": "@cirrusprotocol/devnet-alpha",
+  "version": "0.1.0-alpha.0",
+  "description": "Alpha scaffold: guided devnet-alpha command planner (simulate-only). Not published; not for real funds.",
+  "private": true,
+  "type": "commonjs",
+  "license": "ISC",
+  "bin": {
+    "devnet-alpha": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

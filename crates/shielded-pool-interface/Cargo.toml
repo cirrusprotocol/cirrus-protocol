@@ -1,0 +1,9 @@
+[package]
+name = "shielded-pool-interface"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+borsh = "1.6.1"
+borsh-derive = "1.6.1"
+solana-program = "3.0.0"

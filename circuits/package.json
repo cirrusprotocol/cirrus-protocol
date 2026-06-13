@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "description": "Circuit source for WITHDRAW_SOL_V1. Source only — do not generate artifacts in this directory without following docs/PHASE4_REAL_ARTIFACT_PREFLIGHT_RUNBOOK.md.",
+  "scripts": {
+    "check:source-only": "echo 'Circuit source only. Artifact generation requires a reviewed circom + snarkjs toolchain. See docs/PHASE4_REAL_ARTIFACT_PREFLIGHT_RUNBOOK.md.'"
+  },
+  "notes": {
+    "circom_target": ">=2.1.6",
+    "circomlib_target": "^2.0.5",
+    "snarkjs_target": ">=0.7.0",
+    "poseidon_reference": "circomlibjs 0.1.7 buildPoseidon() — BN254 x5, byte-identical output required"
+  }
+}

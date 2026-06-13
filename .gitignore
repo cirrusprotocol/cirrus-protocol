@@ -1,0 +1,40 @@
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+.surfpool
+target/
+.env
+.env.*
+.DS_Store
+*.pem
+*.key
+*.kdbx
+*-keypair.json
+.vs/
+
+# Local runtime artifacts / secrets
+keys/
+.venv/
+snapshots/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# ZK proving artifacts (large or private; do not commit)
+*.zkey
+*.r1cs
+*.wtns
+*.wasm
+*.ptau
+*.sym
+circuits/build/
+circuits/*_js/
+tests/fixtures/zk/**/proof.json
+tests/fixtures/zk/**/witness.json
+tests/fixtures/zk/**/witness_export.json
+tests/fixtures/zk/**/verification_key.json
