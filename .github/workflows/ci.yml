@@ -119,7 +119,7 @@ jobs:
       - name: Shell script syntax check
         run: |
           bash -n scripts/ops/check_deploy_artifact_not_mock.sh
-          bash -n scripts/deploy_devnet.sh
+          if [[ -f scripts/deploy_devnet.sh ]]; then bash -n scripts/deploy_devnet.sh; else echo "Skipping scripts/deploy_devnet.sh; not present in public export."; fi
           bash -n scripts/run_all_tests.sh
 
       - name: Whitespace check
