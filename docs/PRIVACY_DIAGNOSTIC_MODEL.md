@@ -1,17 +1,25 @@
-# Privacy Diagnostic Model for Cirrus ZK Settlement Flows
+# Privacy Diagnostic Model
 
 ## Status
 
-Research note.
+M1.7 design note.
+
+Scope: devnet-alpha architecture.
+
+Depends on:
+
+* `docs/ADAPTER_MODEL.md`
+* `docs/DELAYED_ADAPTER_BINDING.md`
+* `docs/PRIVACY_SURFACE_MODEL.md`
 
 This document does not define a privacy proof, a completed mitigation strategy,
 or a guarantee that a Cirrus action is unlinkable.
 
-It defines a conservative diagnostic model for reasoning about public metadata
-around Cirrus ZK settlement and claim flows.
+It defines a conservative diagnostic model for reporting public metadata around
+Cirrus private settlement and claim adapters.
 
-Cirrus is a devnet-alpha research prototype. It is unaudited, not mainnet-ready,
-not intended for real funds, and makes no privacy guarantee.
+Cirrus is a devnet-alpha protocol. It is unaudited, not mainnet-ready, not
+intended for real funds, and makes no privacy guarantee.
 
 ## Motivation
 
@@ -19,7 +27,10 @@ A valid ZK proof is a correctness signal.
 
 It can show that a private statement was satisfied without revealing the witness.
 In Cirrus, the current `WITHDRAW_SOL_V1` path also checks root membership,
-nullifier replay protection, and tx_hash-bound settlement.
+nullifier replay protection, and `tx_hash`-bound settlement.
+
+In the generic adapter model, `tx_hash` is the `WITHDRAW_SOL_V1` name for the
+adapter-specific `intent_hash`.
 
 That is not the same as practical privacy.
 
@@ -31,12 +42,12 @@ infrastructure usage.
 The purpose of the diagnostic model is to make those conditions visible before
 they are mistaken for privacy.
 
-## Relationship to Metadata Linkability
+## Relationship to Privacy Surface Model
 
 The metadata linkability model asks:
 
 ```text
-Which public fields help an observer narrow the path from a later action back to an earlier commitment?
+Which public surfaces help an observer narrow the path from a later action back to an earlier commitment?
 ```
 
 This diagnostic model asks the next question:
@@ -51,6 +62,10 @@ It produces warnings, measurements, and review signals that help developers and
 operators understand when a ZK action may be practically linkable despite being
 valid.
 
+The privacy surface model identifies the surfaces.
+
+The diagnostic model reports them.
+
 ## Non-Goals
 
 This model does not attempt to:
@@ -63,7 +78,7 @@ This model does not attempt to:
 * collect private user data
 * inspect secret notes or witnesses
 * rely on relayer-side private logs
-* claim that a less severe diagnostic report means an action is private
+* claim that a less severe diagnostic report is a positive privacy signal
 
 A diagnostic report is a warning system, not a privacy certificate.
 
@@ -90,9 +105,14 @@ The on-chain program can enforce correctness properties:
 * allowed root
 * proof verification
 * nullifier not previously consumed
-* tx_hash / intent binding
+* `intent_hash` binding (`tx_hash` for `WITHDRAW_SOL_V1`)
 * adapter-specific settlement checks
 * fail-closed behavior
+
+This model is descriptive first.
+
+It identifies and reports surfaces; it does not automatically enforce a minimum
+anonymity threshold.
 
 The on-chain program cannot fully evaluate practical privacy because many
 linkability signals are not available to it:
@@ -133,8 +153,11 @@ Each adapter should define:
 
 * which public fields it exposes
 * which fields narrow the effective anonymity set
-* which fields are required for safety
+* which fields are required for correctness
 * which fields exist only for convenience, indexing, or debugging
+* which `note_family` and `root_domain` it uses
+* how `global_nullifier` is represented
+* what exactly is bound by `intent_hash`
 * which diagnostics should be reviewed before the adapter is expanded
 
 ## Practical Model: Effective Anonymity Set
@@ -146,14 +169,16 @@ A simple working model:
 
 ```text
 effective anonymity set =
-  root set
-∩ amount bucket
+  accepted root candidates
+∩ compatible note family
+∩ compatible root domain
+∩ amount or bucket
 ∩ adapter/action type
 ∩ time window
-∩ relayer set
-∩ recipient behavior
+∩ relayer/submission pattern
+∩ recipient/action-target behavior
 ∩ fee/expiry pattern
-∩ infrastructure metadata
+∩ observable infrastructure metadata
 ```
 
 This is not a formal privacy proof.
@@ -166,7 +191,8 @@ but also which public filters made the action easier to cluster.
 
 ## Diagnostic Vocabulary and Finding Levels
 
-The model avoids saying that an action is “safe,” “private,” or “low risk.”
+The model avoids saying that an action is “private,” “anonymous,”
+“untraceable,” or “ready.”
 
 Instead, diagnostic levels should be conservative:
 
@@ -178,7 +204,7 @@ OBSERVED
 UNKNOWN
 ```
 
-These levels classify observed metadata conditions, not user safety. A less
+These levels classify observed metadata conditions, not user protection. A less
 severe finding does not mean that an action is private or unlinkable.
 
 ### CRITICAL
@@ -237,7 +263,7 @@ Examples:
 
 The diagnostic does not have enough data.
 
-Unknown must not be interpreted as safe.
+Unknown must not be interpreted as a pass or a positive privacy signal.
 
 Examples:
 
@@ -368,11 +394,14 @@ A simple v0 model:
 ```text
 candidate_set_v0 =
   commitments included in the accepted root
-∩ commitments compatible with the root domain used by WITHDRAW_SOL_V1
-∩ commitments compatible with denomination
+∩ commitments compatible with the accepted root domain
+∩ commitments compatible with the adapter note family
+∩ commitments compatible with the amount or bucket
 ∩ commitments created before or at the accepted root
 ∩ commitments not known to be excluded by public timing constraints
 ```
+
+For `WITHDRAW_SOL_V1`, the amount/bucket filter is the fixed SOL denomination.
 
 The diagnostic should report the size of this set.
 
@@ -461,18 +490,18 @@ Example findings:
 * withdrawal submitted immediately after witness/proof generation in a public
   demo context
 
-Timing is one of the strongest practical linkability surfaces, especially in
-small test sets.
+Timing can be one of the most useful practical linkability surfaces for an
+observer, especially in small test sets.
 
 The diagnostic should report timing signals without attempting to identify the
 user.
 
-## Amount and Denomination Diagnostic
+## Amount or Bucket Diagnostic
 
-Amounts are strong filters.
+Amounts and buckets can be strong filters.
 
-For fixed-denomination adapters, the diagnostic should report the size of the
-denomination bucket under the accepted root.
+For fixed-denomination adapters, the diagnostic should report the
+same-denomination candidate count under the accepted root.
 
 Useful fields:
 
@@ -539,9 +568,12 @@ Finding examples:
 A diagnostic should flag unique expiry patterns, especially when candidate count
 is small.
 
-## Recipient Diagnostic
+## Recipient or Action-Target Diagnostic
 
-For withdrawal-style adapters, recipient is public.
+For withdrawal-style adapters, the recipient is public at action time.
+
+For claim-style adapters, the action target may be public or inferable from
+accounts, events, or verifier context.
 
 Useful fields:
 
@@ -551,6 +583,8 @@ Useful fields:
 * whether recipient is funded by a known depositor address, if public data is
   available
 * whether recipient has public identity links, if externally known
+* action target reuse
+* target account shape
 
 The first diagnostic version should be conservative.
 
@@ -562,7 +596,7 @@ recipient_pattern = UNKNOWN
 
 Do not infer safety from missing recipient data.
 
-## Relayer Diagnostic
+## Relayer and Submission Diagnostic
 
 Relayers can reduce direct wallet linkage but introduce their own metadata
 surface.
@@ -575,6 +609,10 @@ Useful fields:
 * relayer fee pattern
 * recipient/relayer aliasing
 * whether one relayer dominates the flow
+* submission route
+* simulation behavior
+* retry behavior
+* fee payer pattern
 
 Finding examples:
 
@@ -663,19 +701,21 @@ Minimum fields:
 ```text
 adapter_id
 adapter_type
+note_family
 root_domain
 public_inputs_schema
 intent_hash_schema
+global_nullifier_representation
 nullifier_policy
 required_public_accounts
 event_surface
 recipient_or_target_surface
-relayer_or_facilitator_surface
+relayer_or_submission_surface
 timing_surface
-amount_or_value_surface
-claim_domain_surface
+amount_or_bucket_surface
+claim_metadata_surface
 infrastructure_assumptions
-diagnostic_signals
+diagnostic_topics
 known_limitations
 ```
 
@@ -684,10 +724,12 @@ For `WITHDRAW_SOL_V1`:
 ```text
 adapter_id: WITHDRAW_SOL_V1
 adapter_type: value_withdrawal
-root_domain: value_note_tree
+note_family: VALUE_NOTE_TREE_V1
+root_domain: VALUE_NOTE_TREE_V1
 public_inputs: [root, nullifier_hash, tx_hash]
+global_nullifier: nullifier_hash
 intent_hash: tx_hash
-nullifier_policy: one nullifier per spent note
+nullifier_policy: GLOBAL_NULLIFIER_V1
 visible_action_surface:
   - root
   - nullifier_hash
@@ -702,7 +744,7 @@ diagnostic_signals:
   - candidate_count
   - root_age_slots
   - root_batch_size
-  - denomination_bucket_count
+  - same_denomination_candidate_count
   - timing_gap
   - fee_pattern
   - expiry_pattern
@@ -710,29 +752,39 @@ diagnostic_signals:
   - recipient_pattern
 ```
 
-For future claim adapters:
+For `PRIVATE_CLAIM_V1`:
 
 ```text
-adapter_id: CLAIM_*_V1
+adapter_id: PRIVATE_CLAIM_V1
 adapter_type: private_claim
-root_domain: claim_tree or adapter-defined claim root domain
-public_inputs: adapter-defined
-intent_hash: adapter-specific claim/action digest
-nullifier_policy: one nullifier per claim or per claim domain
+note_family: CLAIM_NOTE_TREE_V1
+root_domain: CLAIM_NOTE_TREE_V1
+public_inputs: [root, global_nullifier, intent_hash]
+global_nullifier: adapter-defined claim nullifier hash
+intent_hash: PRIVATE_CLAIM_INTENT_V1
+nullifier_policy: GLOBAL_NULLIFIER_V1
+default_event_policy: minimal claim event
 visible_action_surface:
-  - claim domain
-  - issuer or resource family, if public
-  - nullifier_hash
+  - adapter_id
+  - root
+  - global_nullifier
   - intent_hash
-  - action target
-  - expiry
+  - verifier/program context
+  - transaction slot
+default_raw_metadata_policy:
+  - raw claim domain: not public by default
+  - raw issuer: not public by default
+  - raw resource: not public by default
+  - raw user identifier: not public by default
 diagnostic_signals:
-  - claim_domain_size
-  - issuer_concentration
-  - resource_uniqueness
-  - redemption_timing
-  - facilitator_pattern
-  - external_payment_metadata
+  - claim_candidate_count
+  - root_freshness
+  - action_frequency
+  - claim_metadata_surface
+  - event_metadata
+  - timing_gap
+  - relayer_or_submission_pattern
+  - snapshot_hygiene
 ```
 
 ## Review Gate for New Adapters
@@ -744,11 +796,14 @@ Before adding a new adapter, the design should answer:
 3. Which fields are only for indexing or debugging?
 4. Which fields narrow the effective anonymity set?
 5. What is the adapter’s root domain?
-6. What is the adapter’s nullifier scope?
-7. What exactly is included in the intent hash?
-8. Does the adapter create a small or fragmented anonymity set?
-9. Does the adapter depend on external infrastructure metadata?
-10. What diagnostics can be computed from public data?
+6. What is the adapter’s note family?
+7. Is `adapter_id` excluded from generic commitments?
+8. Is `adapter_id` included in `intent_hash`?
+9. Does the adapter use `GLOBAL_NULLIFIER_V1` or a documented exception?
+10. What exactly is included in the intent hash?
+11. Does the adapter create a small or fragmented anonymity set?
+12. Does the adapter depend on external infrastructure metadata?
+13. What diagnostics can be computed from public data?
 
 An adapter should not move from concept to implementation until this review
 exists.
@@ -778,6 +833,9 @@ Program-level blocking should be treated carefully. The on-chain program cannot
 see enough context to reliably enforce practical privacy, and naive blocking
 rules can create new metadata or denial-of-service surfaces.
 
+This matches the current M1.x scope: diagnostics are report-only unless a later
+adapter explicitly defines a stricter client-side policy.
+
 The safest first path is:
 
 ```text
@@ -793,7 +851,7 @@ Diagnostic rules should be versioned.
 Example:
 
 ```text
-privacy_diagnostic_version = 0.1.0
+privacy_diagnostic_version = PRIVACY_DIAGNOSTIC_V1
 ```
 
 A diagnostic report should include:
@@ -916,13 +974,14 @@ The first diagnostic pass should focus on:
 1. candidate count under accepted root
 2. root age
 3. root batch size
-4. denomination bucket size
+4. same-denomination candidate count
 5. deposit-to-withdraw timing
 6. fee pattern
 7. expiry pattern
 8. relayer reuse
-9. recipient/relayer aliasing
-10. snapshot safety
+9. recipient reuse
+10. recipient/relayer aliasing
+11. snapshot and indexer hygiene
 
 These are enough to catch the most obvious devnet-alpha linkability failures
 without overbuilding the system.
@@ -1009,6 +1068,11 @@ It is unknown.
   metadata?
 * What should be the minimum diagnostic schema required for a new adapter
   proposal?
+* How should `PRIVATE_CLAIM_V1` report claim metadata risk without revealing
+  additional claim metadata?
+* Should diagnostic topics be adapter-manifest fields?
+* How should `UNKNOWN` findings be represented in user-facing clients?
+* Which diagnostic checks should become test fixtures before M2?
 
 ## Summary
 
@@ -1019,19 +1083,27 @@ The privacy diagnostic model exists to make that distinction explicit.
 The first goal is not to solve every metadata problem. The first goal is to
 avoid hiding those problems behind a successful ZK proof.
 
-For `WITHDRAW_SOL_V1`, the diagnostic layer should report conservative signals
-such as candidate count, root freshness, denomination bucket size, timing, fee
-and expiry uniqueness, relayer behavior, recipient behavior, and snapshot
-safety.
+For `WITHDRAW_SOL_V1`, diagnostics should report conservative signals such as
+candidate count, root freshness, same-denomination candidate count, timing,
+fee and expiry uniqueness, relayer behavior, recipient behavior, and snapshot
+hygiene.
 
-For future adapters, diagnostics should become a design gate.
+For `PRIVATE_CLAIM_V1`, diagnostics should additionally focus on claim metadata,
+event surface, action frequency, raw metadata avoidance, and adapter-specific
+intent binding.
+
+The diagnostic model is part of the adapter review path:
+
+```text
+proof correctness
+intent binding
+metadata diagnostics
+```
 
 Before adding a new action family, Cirrus should ask:
 
-```text
 What public metadata does this adapter reveal?
 Does that metadata reduce the effective anonymity set?
 Can the risk be measured or at least reported?
-```
 
 Only then should the adapter move forward.
